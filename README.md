@@ -1,1 +1,1 @@
-# CHESS-BD
+# PERSONALchess
