@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHESS BD</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    background: #10131a;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game {
+    width: 100%;
+    max-width: 520px;
+    padding: 18px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+    letter-spacing: 3px;
+}
+
+.status {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 12px;
+    background: #1d2330;
+    font-weight: bold;
+}
+
+.board {
+    width: 100%;
+    aspect-ratio: 1;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    border: 5px solid #292f3b;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,.5);
+}
+
+.square {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(30px, 9vw, 55px);
+    cursor: pointer;
+    user-select: none;
+}
+
+.light {
+    background: #f0d9b5;
+}
+
+.dark {
+    background: #b58863;
+}
+
+.selected {
+    outline: 4px solid #00e5ff;
+    outline-offset: -4px;
+}
+
+.controls {
+    margin-top: 18px;
+}
+
+button {
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: #00bcd4;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(.96);
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>♟ CHESS BD</h1>
+
+    <div class="status" id="status">
+        White's Turn
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="controls">
+        <button onclick="newGame()">🔄 New Game</button>
+    </div>
+
+</div>
+
+<script>
+
+const pieces = {
+    r: "♜",
+    n: "♞",
+    b: "♝",
+    q: "♛",
+    k: "♚",
+    p: "♟",
+
+    R: "♖",
+    N: "♘",
+    B: "♗",
+    Q: "♕",
+    K: "♔",
+    P: "♙"
+};
+
+let board;
+let turn = "white";
+let selected = null;
+
+function newGame() {
+
+    board = [
+        ["r","n","b","q","k","b","n","r"],
+        ["p","p","p","p","p","p","p","p"],
+        ["","","","","","","",""],
+        ["","","","","","","",""],
+        ["","","","","","","",""],
+        ["","","","","","","",""],
+        ["P","P","P","P","P","P","P","P"],
+        ["R","N","B","Q","K","B","N","R"]
+    ];
+
+    turn = "white";
+    selected = null;
+
+    drawBoard();
+}
+
+function drawBoard() {
+
+    const boardElement = document.getElementById("board");
+
+    boardElement.innerHTML = "";
+
+    for (let row = 0; row < 8; row++) {
+
+        for (let col = 0; col < 8; col++) {
+
+            const square = document.createElement("div");
+
+            square.className =
+                "square " +
+                ((row + col) % 2 === 0 ? "light" : "dark");
+
+            if (
+                selected &&
+                selected[0] === row &&
+                selected[1] === col
+            ) {
+                square.classList.add("selected");
+            }
+
+            const piece = board[row][col];
+
+            if (piece) {
+                square.textContent = pieces[piece];
+            }
+
+            square.onclick = () => clickSquare(row, col);
+
+            boardElement.appendChild(square);
+        }
+    }
+
+    document.getElementById("status").textContent =
+        turn === "white"
+        ? "White's Turn"
+        : "Black's Turn";
+}
+
+function isWhite(piece) {
+
+    return piece && piece === piece.toUpperCase();
+}
+
+function isBlack(piece) {
+
+    return piece && piece === piece.toLowerCase();
+}
+
+function clickSquare(row, col) {
+
+    const piece = board[row][col];
+
+    if (!selected) {
+
+        if (!piece) return;
+
+        if (
+            (turn === "white" && !isWhite(piece)) ||
+            (turn === "black" && !isBlack(piece))
+        ) {
+            return;
+        }
+
+        selected = [row, col];
+
+        drawBoard();
+
+        return;
+    }
+
+    const fromRow = selected[0];
+    const fromCol = selected[1];
+
+    const movingPiece = board[fromRow][fromCol];
+
+    if (
+        piece &&
+        (
+            (turn === "white" && isWhite(piece)) ||
+            (turn === "black" && isBlack(piece))
+        )
+    ) {
+
+        selected = [row, col];
+
+        drawBoard();
+
+        return;
+    }
+
+    board[row][col] = movingPiece;
+    board[fromRow][fromCol] = "";
+
+    turn = turn === "white" ? "black" : "white";
+
+    selected = null;
+
+    drawBoard();
+}
+
+newGame();
+
+</script>
+
+</body>
+</html>
